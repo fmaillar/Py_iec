@@ -6,6 +6,7 @@ import re
 
 from py_iec.errors import ParseError, UnsupportedFeatureError
 from py_iec.model import Assignment, FunctionBlock, Program, VariableDeclaration
+from py_iec.validator import validate_program
 
 _IDENTIFIER = r"[A-Za-z_][A-Za-z0-9_]*"
 _BLOCK_RE = re.compile(
@@ -29,11 +30,12 @@ _ASSIGNMENT_RE = re.compile(
 _UNSUPPORTED_TOKENS = ("PROGRAM", "FUNCTION ", "VAR_INPUT", "VAR_OUTPUT")
 
 
-def parse_source(source: str) -> Program:
+def parse_source(source: str, validate: bool = True) -> Program:
     """Analyse une source IEC et retourne un programme intermédiaire.
 
     Args:
         source: Texte IEC contenant au moins un ``FUNCTION_BLOCK``.
+        validate: Active la validation sémantique après le parsing.
 
     Returns:
         Programme typé contenant les blocs, variables et affectations supportés.
@@ -49,7 +51,10 @@ def parse_source(source: str) -> Program:
     blocks = tuple(_parse_function_block(match) for match in _BLOCK_RE.finditer(source))
     if not blocks:
         raise ParseError("Aucun FUNCTION_BLOCK complet n'a été trouvé.")
-    return Program(function_blocks=blocks)
+    program = Program(function_blocks=blocks)
+    if validate:
+        validate_program(program)
+    return program
 
 
 def _detect_unsupported_features(source: str) -> None:

@@ -13,6 +13,7 @@ Le projet fournit une base maintenable pour :
 - représenter les sources dans un modèle intermédiaire typé ;
 - signaler explicitement les erreurs de syntaxe, validation et fonctionnalités
   hors périmètre ;
+- valider sémantiquement les affectations vers des variables déclarées ;
 - préparer de futures extensions vers FBD, LD, SFC ;
 - fournir des helpers robustes pour lire les listes documentaires Excel de
   certification et extraire des identifiants textuels avec fallback.
@@ -28,6 +29,7 @@ Le projet fournit une base maintenable pour :
 | FBD, LD, SFC, IL | À faire | Non analysés dans cette première base |
 | Feuilles Excel `Liste_documentaire`, `Liste_Documentaire` | Support helper | Lecture exacte via `pandas` et `openpyxl` |
 | Colonnes dynamiques Excel | Support helper | Recherche regex stricte puis tolérante |
+| Validation sémantique | Support initial | Les affectations doivent cibler une variable déclarée |
 
 ## Prérequis techniques
 
@@ -93,6 +95,7 @@ versionnée afin d'éviter les artefacts générés dans le dépôt.
 - `src/py_iec/model.py` : dataclasses du modèle intermédiaire ;
 - `src/py_iec/parser.py` : parseur regex minimal avec passe stricte puis
   tolérante sur les déclarations ;
+- `src/py_iec/validator.py` : validation sémantique du modèle intermédiaire ;
 - `src/py_iec/errors.py` : exceptions publiques ;
 - `src/py_iec/excel.py` : helpers de lecture Excel sans chemin absolu ;
 - `src/py_iec/extraction.py` : extractions regex stricte, tolérante puis fallback ;
