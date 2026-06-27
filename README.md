@@ -28,6 +28,10 @@ Le projet fournit une base maintenable pour :
 | `PROGRAM`, `FUNCTION` | Hors périmètre | Erreur explicite `UnsupportedFeatureError` |
 | `IF`, `CASE`, boucles | Support partiel | Parsing minimal non imbriqué |
 | Génération Python et runtime | Prototype | Affectations de premier niveau |
+| Structured Text `FUNCTION_BLOCK` | Support initial | Nom, section `VAR`, affectations simples |
+| Déclarations `BOOL`, `INT`, `DINT`, `REAL`, `STRING` | Support initial | Valeur initiale textuelle optionnelle |
+| Affectation `variable := expression;` | Support initial | Expression conservée sous forme textuelle |
+| `PROGRAM`, `FUNCTION`, `VAR_INPUT`, `VAR_OUTPUT` | Hors périmètre | Erreur explicite `UnsupportedFeatureError` |
 | FBD, LD, SFC, IL | À faire | Non analysés dans cette première base |
 | Feuilles Excel `Liste_documentaire`, `Liste_Documentaire` | Support helper | Lecture exacte via `pandas` et `openpyxl` |
 | Colonnes dynamiques Excel | Support helper | Recherche regex stricte puis tolérante |
