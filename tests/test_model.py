@@ -25,3 +25,16 @@ def test_duplicate_variables_are_rejected() -> None:
 
     with pytest.raises(ValidationError):
         FunctionBlock(name="Counter", variables=(variable, variable))
+
+
+def test_variable_scope_is_normalized() -> None:
+    """Vérifie la normalisation de la portée déclarative IEC."""
+    variable = VariableDeclaration(name="start", type_name="BOOL", scope="var_input")
+
+    assert variable.scope == "VAR_INPUT"
+
+
+def test_invalid_variable_scope_is_rejected() -> None:
+    """Vérifie qu'une portée de variable inconnue est refusée."""
+    with pytest.raises(ValidationError):
+        VariableDeclaration(name="start", type_name="BOOL", scope="VAR_TEMP")

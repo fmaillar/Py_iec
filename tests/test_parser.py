@@ -45,3 +45,27 @@ END_FUNCTION_BLOCK
     program = parse_source(source)
 
     assert program.function_blocks[0].variables[0].name == "count"
+
+
+def test_parse_input_and_output_variable_sections() -> None:
+    """Vérifie le support initial des sections VAR_INPUT et VAR_OUTPUT."""
+    source = """FUNCTION_BLOCK Comparator
+VAR_INPUT
+    actual : REAL;
+    expected : REAL;
+END_VAR
+VAR_OUTPUT
+    match : BOOL;
+END_VAR
+match := actual = expected;
+END_FUNCTION_BLOCK
+"""
+
+    program = parse_source(source)
+    variables = program.function_blocks[0].variables
+
+    assert [variable.scope for variable in variables] == [
+        "VAR_INPUT",
+        "VAR_INPUT",
+        "VAR_OUTPUT",
+    ]
