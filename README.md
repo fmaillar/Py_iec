@@ -27,11 +27,7 @@ Le projet fournit une base maintenable pour :
 | Affectation `variable := expression;` | Support initial | Expression convertie en AST minimal |
 | `PROGRAM`, `FUNCTION` | Hors périmètre | Erreur explicite `UnsupportedFeatureError` |
 | `IF`, `CASE`, boucles | Support partiel | Parsing minimal non imbriqué |
-| Génération Python et runtime | Prototype | Affectations de premier niveau |
-| Structured Text `FUNCTION_BLOCK` | Support initial | Nom, section `VAR`, affectations simples |
-| Déclarations `BOOL`, `INT`, `DINT`, `REAL`, `STRING` | Support initial | Valeur initiale textuelle optionnelle |
-| Affectation `variable := expression;` | Support initial | Expression conservée sous forme textuelle |
-| `PROGRAM`, `FUNCTION`, `VAR_INPUT`, `VAR_OUTPUT` | Hors périmètre | Erreur explicite `UnsupportedFeatureError` |
+| Génération Python et runtime | Prototype | Affectations et structures non imbriquées |
 | FBD, LD, SFC, IL | À faire | Non analysés dans cette première base |
 | Feuilles Excel `Liste_documentaire`, `Liste_Documentaire` | Support helper | Lecture exacte via `pandas` et `openpyxl` |
 | Colonnes dynamiques Excel | Support helper | Recherche regex stricte puis tolérante |
@@ -114,6 +110,7 @@ versionnée afin d'éviter les artefacts générés dans le dépôt.
 - `src/py_iec/extraction.py` : extractions regex stricte, tolérante puis fallback ;
 - `src/py_iec/codegen.py` : génération Python prototype ;
 - `src/py_iec/runtime.py` : runtime d'exécution minimal ;
+- `src/py_iec/statement_utils.py` : parcours récursif des instructions ;
 - `src/py_iec/diagnostics.py` : diagnostics structurés ;
 - `src/py_iec/cli.py` : point d'entrée CLI ;
 - `tests/` : tests unitaires et fixture texte légère.

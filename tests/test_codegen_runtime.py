@@ -38,3 +38,24 @@ END_FUNCTION_BLOCK
     state = execute_block(program.function_blocks[0])
 
     assert state.values["count"] == 1
+
+
+def test_generate_python_class_contains_if_statement() -> None:
+    """Vérifie que le générateur produit une structure if Python."""
+    program = parse_source(
+        """FUNCTION_BLOCK Logic
+VAR
+    enabled : BOOL := TRUE;
+    result : BOOL;
+END_VAR
+IF enabled THEN
+result := TRUE;
+END_IF
+END_FUNCTION_BLOCK
+"""
+    )
+
+    source = generate_python_class(program.function_blocks[0])
+
+    assert "if self.enabled" in source
+    assert "self.result" in source
