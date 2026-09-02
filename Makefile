@@ -1,4 +1,4 @@
-.PHONY: run lint test doc
+.PHONY: run lint test doc type coverage
 
 run:
 	python -m py_iec --example

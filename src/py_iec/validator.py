@@ -4,8 +4,19 @@ from __future__ import annotations
 
 from py_iec.errors import ValidationError
 from py_iec.expressions import iter_variable_references
-from py_iec.model import Assignment, FunctionBlock, Program
-from py_iec.type_checker import validate_assignment_type
+from py_iec.model import (
+    Assignment,
+    CaseStatement,
+    ForStatement,
+    FunctionBlock,
+    IfStatement,
+    Program,
+    RepeatStatement,
+    Statement,
+    VariableDeclaration,
+    WhileStatement,
+)
+from py_iec.type_checker import infer_expression_type, validate_assignment_type
 
 
 def validate_program(program: Program) -> None:
@@ -39,14 +50,69 @@ def validate_function_block(block: FunctionBlock) -> None:
             une expression référence une variable inconnue.
     """
     declared_names = {variable.name.upper(): variable for variable in block.variables}
-    for assignment in block.assignments:
-        _validate_assignment(block, assignment, declared_names)
+    statements = block.statements or block.assignments
+    for statement in statements:
+        _validate_statement(block, statement, declared_names)
+
+
+def _validate_statement(
+    block: FunctionBlock,
+    statement: Statement,
+    declared_names: dict[str, VariableDeclaration],
+) -> None:
+    """Valide récursivement une instruction.
+
+    Args:
+        block: Bloc contenant l'instruction.
+        statement: Instruction à contrôler.
+        declared_names: Variables déclarées indexées en majuscules.
+
+    Raises:
+        ValidationError: Si l'instruction viole les règles supportées.
+    """
+    if isinstance(statement, Assignment):
+        _validate_assignment(block, statement, declared_names)
+        return
+    if isinstance(statement, IfStatement):
+        _validate_boolean_expression(statement.condition, block)
+        for child in statement.then_statements + statement.else_statements:
+            _validate_statement(block, child, declared_names)
+        return
+    if isinstance(statement, CaseStatement):
+        _validate_expression_references(statement.selector, declared_names)
+        for branch in statement.branches:
+            for child in branch.statements:
+                _validate_statement(block, child, declared_names)
+        for child in statement.else_statements:
+            _validate_statement(block, child, declared_names)
+        return
+    if isinstance(statement, WhileStatement):
+        _validate_boolean_expression(statement.condition, block)
+        for child in statement.statements:
+            _validate_statement(block, child, declared_names)
+        return
+    if isinstance(statement, RepeatStatement):
+        if statement.until is None:
+            raise ValidationError("Condition UNTIL absente.")
+        _validate_boolean_expression(statement.until, block)
+        for child in statement.statements:
+            _validate_statement(block, child, declared_names)
+        return
+    if isinstance(statement, ForStatement):
+        if statement.variable.upper() not in declared_names:
+            raise ValidationError(f"Compteur FOR non déclaré: {statement.variable}")
+        _validate_expression_references(statement.start, declared_names)
+        _validate_expression_references(statement.stop, declared_names)
+        if statement.step is not None:
+            _validate_expression_references(statement.step, declared_names)
+        for child in statement.statements:
+            _validate_statement(block, child, declared_names)
 
 
 def _validate_assignment(
     block: FunctionBlock,
     assignment: Assignment,
-    declared_names: dict[str, object],
+    declared_names: dict[str, VariableDeclaration],
 ) -> None:
     """Valide une affectation individuelle.
 
@@ -65,7 +131,36 @@ def _validate_assignment(
         )
     if target.scope == "VAR_INPUT":
         raise ValidationError(f"Écriture interdite sur VAR_INPUT: {assignment.target}")
-    for reference in iter_variable_references(assignment.expression):
+    _validate_expression_references(assignment.expression, declared_names)
+    validate_assignment_type(target.type_name, assignment.expression, block)
+
+
+def _validate_expression_references(
+    expression: object, declared_names: dict[str, VariableDeclaration]
+) -> None:
+    """Valide les références de variables d'une expression.
+
+    Args:
+        expression: Expression IEC à parcourir.
+        declared_names: Variables déclarées indexées en majuscules.
+
+    Raises:
+        ValidationError: Si une référence est inconnue.
+    """
+    for reference in iter_variable_references(expression):
         if reference.upper() not in declared_names:
             raise ValidationError(f"Variable référencée non déclarée: {reference}")
-    validate_assignment_type(target.type_name, assignment.expression, block)
+
+
+def _validate_boolean_expression(expression: object, block: FunctionBlock) -> None:
+    """Valide qu'une expression est booléenne.
+
+    Args:
+        expression: Expression à contrôler.
+        block: Bloc contenant les déclarations.
+
+    Raises:
+        ValidationError: Si l'expression n'est pas typée BOOL.
+    """
+    if infer_expression_type(expression, block) != "BOOL":
+        raise ValidationError("Une condition doit être de type BOOL.")

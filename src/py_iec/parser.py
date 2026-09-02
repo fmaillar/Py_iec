@@ -19,6 +19,7 @@ from py_iec.model import (
     VariableDeclaration,
     WhileStatement,
 )
+from py_iec.statement_utils import iter_assignments
 from py_iec.validator import validate_program
 
 _IDENTIFIER = r"[A-Za-z_][A-Za-z0-9_]*"
@@ -107,9 +108,7 @@ def _parse_function_block(match: re.Match[str]) -> FunctionBlock:
     variables = _parse_variables(body)
     executable_body = _VAR_SECTION_RE.sub("", body)
     statements = _parse_statements(executable_body)
-    assignments = tuple(
-        statement for statement in statements if isinstance(statement, Assignment)
-    )
+    assignments = iter_assignments(statements)
     return FunctionBlock(
         name=name, variables=variables, assignments=assignments, statements=statements
     )
