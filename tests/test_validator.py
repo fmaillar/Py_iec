@@ -3,6 +3,7 @@
 import pytest
 
 from py_iec.errors import ValidationError
+from py_iec.expressions import parse_expression
 from py_iec.model import Assignment, FunctionBlock, Program, VariableDeclaration
 from py_iec.parser import parse_source
 from py_iec.validator import validate_program
@@ -13,7 +14,9 @@ def test_validate_program_accepts_declared_assignment_target() -> None:
     block = FunctionBlock(
         name="Counter",
         variables=(VariableDeclaration(name="count", type_name="INT"),),
-        assignments=(Assignment(target="count", expression="count + 1"),),
+        assignments=(
+            Assignment(target="count", expression=parse_expression("count + 1")),
+        ),
     )
     program = Program(function_blocks=(block,))
 
@@ -25,7 +28,7 @@ def test_validate_program_rejects_undeclared_assignment_target() -> None:
     block = FunctionBlock(
         name="Counter",
         variables=(VariableDeclaration(name="count", type_name="INT"),),
-        assignments=(Assignment(target="missing", expression="1"),),
+        assignments=(Assignment(target="missing", expression=parse_expression("1")),),
     )
     program = Program(function_blocks=(block,))
 

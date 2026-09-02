@@ -11,3 +11,10 @@ test:
 
 doc:
 	pdoc src/py_iec -o docs
+
+
+type:
+	mypy src
+
+coverage:
+	pytest --cov=py_iec --cov-report=term-missing

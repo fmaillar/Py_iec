@@ -21,3 +21,21 @@ def test_cli_example_outputs_summary(capsys: CaptureFixture[str]) -> None:
     captured = capsys.readouterr()
     assert exit_code == 0
     assert "FUNCTION_BLOCK Counter" in captured.out
+
+
+def test_cli_json_outputs_model(capsys: CaptureFixture[str]) -> None:
+    """Vérifie la sortie JSON de la CLI."""
+    exit_code = main(["--example", "--json"])
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert '"function_blocks"' in captured.out
+
+
+def test_cli_generate_python_outputs_class(capsys: CaptureFixture[str]) -> None:
+    """Vérifie la génération Python via la CLI."""
+    exit_code = main(["--example", "--generate-python"])
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "class Counter" in captured.out

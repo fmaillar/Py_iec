@@ -22,6 +22,12 @@ Le projet fournit une base maintenable pour :
 
 | Élément IEC | Statut | Notes |
 | --- | --- | --- |
+| Structured Text `FUNCTION_BLOCK` | Support initial | Nom, sections variables, affectations simples |
+| Déclarations `BOOL`, `INT`, `DINT`, `REAL`, `STRING` | Support initial | Sections `VAR`, `VAR_INPUT`, `VAR_OUTPUT` |
+| Affectation `variable := expression;` | Support initial | Expression convertie en AST minimal |
+| `PROGRAM`, `FUNCTION` | Hors périmètre | Erreur explicite `UnsupportedFeatureError` |
+| `IF`, `CASE`, boucles | Support partiel | Parsing minimal non imbriqué |
+| Génération Python et runtime | Prototype | Affectations de premier niveau |
 | Structured Text `FUNCTION_BLOCK` | Support initial | Nom, section `VAR`, affectations simples |
 | Déclarations `BOOL`, `INT`, `DINT`, `REAL`, `STRING` | Support initial | Valeur initiale textuelle optionnelle |
 | Affectation `variable := expression;` | Support initial | Expression conservée sous forme textuelle |
@@ -63,6 +69,9 @@ Exemple d'entrée :
 
 ```iecst
 FUNCTION_BLOCK Counter
+VAR_INPUT
+    enabled : BOOL;
+END_VAR
 VAR
     count : INT := 0;
 END_VAR
@@ -85,6 +94,8 @@ make run
 make lint
 make test
 make doc
+make type
+make coverage
 ```
 
 La documentation HTML est générée localement dans `docs/` et n'est pas
@@ -93,11 +104,29 @@ versionnée afin d'éviter les artefacts générés dans le dépôt.
 ## Architecture
 
 - `src/py_iec/model.py` : dataclasses du modèle intermédiaire ;
-- `src/py_iec/parser.py` : parseur regex minimal avec passe stricte puis
-  tolérante sur les déclarations ;
+- `src/py_iec/parser.py` : parseur Structured Text minimal ;
+- `src/py_iec/expressions.py` : AST et parseur Pratt pour expressions ;
+- `src/py_iec/types.py` : catalogue des types scalaires IEC ;
+- `src/py_iec/type_checker.py` : inférence et validation de types ;
 - `src/py_iec/validator.py` : validation sémantique du modèle intermédiaire ;
 - `src/py_iec/errors.py` : exceptions publiques ;
 - `src/py_iec/excel.py` : helpers de lecture Excel sans chemin absolu ;
 - `src/py_iec/extraction.py` : extractions regex stricte, tolérante puis fallback ;
+- `src/py_iec/codegen.py` : génération Python prototype ;
+- `src/py_iec/runtime.py` : runtime d'exécution minimal ;
+- `src/py_iec/diagnostics.py` : diagnostics structurés ;
 - `src/py_iec/cli.py` : point d'entrée CLI ;
 - `tests/` : tests unitaires et fixture texte légère.
+
+## Conformité et CI
+
+La matrice de conformité détaillée est maintenue dans `docs/compliance.md`.
+Le workflow GitHub Actions exécute lint, typage et tests sur plusieurs versions Python.
+
+## Options CLI avancées
+
+```bash
+python -m py_iec --example --json
+python -m py_iec --example --validate-only
+python -m py_iec --example --generate-python
+```
